@@ -93,11 +93,24 @@ int main(int argc, char** argv) {
   assert(ret_alloc_cache == 0);
   assert(cache != nullptr);
 
+  bool initialValuesSet = false;
+  uint64_t rx_packets = 0;
+  uint64_t tx_packets = 0;
+
   while (!g_shallStop) {
     struct packet_info pInfo = getPacketStats(sock, cache, interface);
 
-    std::cout << getTimeStringUTC(pInfo.time) << ": " << pInfo.num_packets_rx
-              << " " << pInfo.num_packets_tx << std::endl;
+    if (!initialValuesSet) {
+      std::cout << "INITIAL --> ";
+      initialValuesSet = true;
+    }
+
+    std::cout << getTimeStringUTC(pInfo.time) << ": "
+              << pInfo.num_packets_rx - rx_packets << " "
+              << pInfo.num_packets_tx - tx_packets << std::endl;
+
+    rx_packets = pInfo.num_packets_rx;
+    tx_packets = pInfo.num_packets_tx;
 
     std::this_thread::sleep_for(
         std::chrono::milliseconds(updateIntervalMilliseconds));
